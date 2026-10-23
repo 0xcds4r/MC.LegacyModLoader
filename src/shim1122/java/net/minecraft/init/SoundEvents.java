@@ -1,0 +1,81 @@
+package net.minecraft.init;
+
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundEvent;
+
+public class SoundEvents {
+    public static final SoundEvent ENTITY_ITEM_PICKUP = sound("entity.item.pickup");
+    public static final SoundEvent BLOCK_LEVER_CLICK = sound("block.lever.click");
+    public static final SoundEvent ENTITY_PLAYER_HURT = sound("entity.player.hurt");
+    public static final SoundEvent ENTITY_ENDERMEN_TELEPORT = sound("entity.endermen.teleport");
+    public static final SoundEvent ITEM_BOTTLE_FILL = sound("item.bottle.fill");
+    public static final SoundEvent ENTITY_EXPERIENCE_ORB_PICKUP = sound("entity.experience_orb.pickup");
+    public static final SoundEvent BLOCK_FIRE_AMBIENT = sound("block.fire.ambient");
+    public static final SoundEvent ENTITY_GENERIC_EXPLODE = sound("entity.generic.explode");
+    public static final SoundEvent ENTITY_ARROW_HIT_PLAYER = sound("entity.arrow.hit_player");
+    public static final SoundEvent ENTITY_ZOMBIE_AMBIENT = sound("entity.zombie.ambient");
+    public static final SoundEvent ENTITY_CREEPER_PRIMED = sound("entity.creeper.primed");
+    public static final SoundEvent ENTITY_PLAYER_LEVELUP = sound("entity.player.levelup");
+    public static final SoundEvent BLOCK_GLASS_BREAK = sound("block.glass.break");
+    public static final SoundEvent ENTITY_ITEM_BREAK = sound("entity.item.break");
+    public static final SoundEvent BLOCK_STONE_BREAK = sound("block.stone.break");
+    public static final SoundEvent BLOCK_WOOD_BREAK = sound("block.wood.break");
+    public static final SoundEvent BLOCK_CLOTH_BREAK = sound("block.cloth.break");
+    public static final SoundEvent BLOCK_METAL_BREAK = sound("block.metal.break");
+    public static final SoundEvent BLOCK_GRASS_BREAK = sound("block.grass.break");
+    public static final SoundEvent BLOCK_SAND_BREAK = sound("block.sand.break");
+    public static final SoundEvent BLOCK_SNOW_BREAK = sound("block.snow.break");
+    public static final SoundEvent BLOCK_ANVIL_BREAK = sound("block.anvil.break");
+    public static final SoundEvent ENTITY_WITCH_AMBIENT = sound("entity.witch.ambient");
+    public static final SoundEvent ENTITY_ENDERDRAGON_GROWL = sound("entity.enderdragon.growl");
+    public static final SoundEvent ENTITY_GHAST_SCREAM = sound("entity.ghast.scream");
+    public static final SoundEvent ENTITY_LIGHTNING_THUNDER = sound("entity.lightning.thunder");
+    public static final SoundEvent BLOCK_PORTAL_AMBIENT = sound("block.portal.ambient");
+    public static final SoundEvent ENTITY_BAT_LOOP = sound("entity.bat.loop");
+    public static final SoundEvent ITEM_ARMOR_EQUIP_LEATHER = sound("item.armor.equip_leather");
+    public static final SoundEvent ITEM_ARMOR_EQUIP_CHAIN = sound("item.armor.equip_chain");
+    public static final SoundEvent ITEM_ARMOR_EQUIP_IRON = sound("item.armor.equip_iron");
+    public static final SoundEvent ITEM_ARMOR_EQUIP_GOLD = sound("item.armor.equip_gold");
+    public static final SoundEvent ITEM_ARMOR_EQUIP_DIAMOND = sound("item.armor.equip_diamond");
+    public static final SoundEvent ITEM_ARMOR_EQUIP_ELYTRA = sound("item.armor.equip_elytra");
+    public static final SoundEvent ITEM_ARMOR_EQUIP_GENERIC = sound("item.armor.equip_generic");
+    public static final SoundEvent ENTITY_PLAYER_ATTACK_STRONG = sound("entity.player.attack.strong");
+    public static final SoundEvent ENTITY_PLAYER_ATTACK_SWEEP = sound("entity.player.attack.sweep");
+    public static final SoundEvent ENTITY_PLAYER_BURP = sound("entity.player.burp");
+    public static final SoundEvent ENTITY_PLAYER_BREATH = sound("entity.player.breath");
+    public static final SoundEvent ENTITY_PLAYER_DEATH = sound("entity.player.death");
+    public static final SoundEvent ENTITY_PLAYER_HURT_DROWN = sound("entity.player.hurt_drown");
+    public static final SoundEvent ENTITY_PLAYER_HURT_ON_FIRE = sound("entity.player.hurt_on_fire");
+    public static final SoundEvent ENTITY_PLAYER_SPLASH = sound("entity.player.splash");
+    public static final SoundEvent ENTITY_PLAYER_SWIM = sound("entity.player.swim");
+    public static final SoundEvent BLOCK_STONE_STEP = sound("block.stone.step");
+    public static final SoundEvent BLOCK_WOOD_STEP = sound("block.wood.step");
+    public static final SoundEvent BLOCK_GRAVEL_STEP = sound("block.gravel.step");
+    public static final SoundEvent BLOCK_SAND_STEP = sound("block.sand.step");
+    public static final SoundEvent BLOCK_CLOTH_STEP = sound("block.cloth.step");
+    public static final SoundEvent BLOCK_METAL_STEP = sound("block.metal.step");
+    public static final SoundEvent BLOCK_GLASS_STEP = sound("block.glass.step");
+    public static final SoundEvent BLOCK_SNOW_STEP = sound("block.snow.step");
+    public static final SoundEvent BLOCK_LADDER_STEP = sound("block.ladder.step");
+    public static final SoundEvent BLOCK_ANVIL_STEP = sound("block.anvil.step");
+    public static final SoundEvent BLOCK_NOTE_HARP = sound("block.note.harp");
+    public static final SoundEvent BLOCK_NOTE_BASEDRUM = sound("block.note.basedrum");
+    public static final SoundEvent BLOCK_NOTE_SNARE = sound("block.note.snare");
+    public static final SoundEvent BLOCK_NOTE_HAT = sound("block.note.hat");
+    public static final SoundEvent BLOCK_NOTE_BASS = sound("block.note.bass");
+    public static final SoundEvent BLOCK_NOTE_GUITAR = sound("block.note.guitar");
+    public static final SoundEvent BLOCK_NOTE_FLUTE = sound("block.note.flute");
+    public static final SoundEvent BLOCK_NOTE_BELL = sound("block.note.bell");
+    public static final SoundEvent BLOCK_NOTE_CHIME = sound("block.note.chime");
+    public static final SoundEvent BLOCK_NOTE_XYLOPHONE = sound("block.note.xylophone");
+    public static final SoundEvent BLOCK_NOTE_PLING = sound("block.note.pling");
+    public static final SoundEvent BLOCK_NOTE_IRON_XYLOPHONE = sound("block.note.iron_xylophone");
+    public static final SoundEvent BLOCK_NOTE_COW_BELL = sound("block.note.cow_bell");
+    public static final SoundEvent BLOCK_NOTE_DIDGERIDOO = sound("block.note.didgeridoo");
+    public static final SoundEvent BLOCK_NOTE_BIT = sound("block.note.bit");
+    public static final SoundEvent BLOCK_NOTE_BANJO = sound("block.note.banjo");
+
+    private static SoundEvent sound(String name) {
+        return new SoundEvent(new ResourceLocation("minecraft", name));
+    }
+}

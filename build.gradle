@@ -1,0 +1,179 @@
+plugins {
+	id 'net.fabricmc.fabric-loom' version "${loom_version}"
+}
+
+version = project.version
+group = project.group
+
+base {
+	archivesName = 'legacy-mod-loader'
+}
+
+repositories {
+	mavenCentral()
+}
+
+loom {
+	mods {
+		"legacyloader" {
+			sourceSet sourceSets.main
+		}
+	}
+}
+
+// The shim layer is compiled separately: it depends on the bridge interfaces in
+// `main`, but `main` never links against shims directly. Shims are shipped inside
+// the mod jar and resolved by LegacyClassLoader through the platform gateway.
+sourceSets {
+	shim1122 {
+		java.srcDirs = ['src/shim1122/java']
+		resources.srcDirs = ['src/shim1122/resources']
+		// Only the compiled bridge interfaces are needed, and referencing the
+		// classes directory directly (instead of sourceSets.main.output) keeps
+		// the task graph acyclic: processResources depends on the shim index,
+		// which depends on compileShim1122Java, which must not depend on classes.
+		compileClasspath += files(sourceSets.main.output.classesDirs) + sourceSets.main.compileClasspath
+		runtimeClasspath += files(sourceSets.main.output.classesDirs) + sourceSets.main.runtimeClasspath
+	}
+	probe {
+		java.srcDirs = ['src/probe/java']
+		compileClasspath += files(sourceSets.main.output.classesDirs, sourceSets.shim1122.output.classesDirs)
+		runtimeClasspath += files(sourceSets.main.output.classesDirs, sourceSets.shim1122.output.classesDirs) +
+				files(sourceSets.main.output.resourcesDir)
+	}
+}
+
+configurations {
+	shim1122Implementation.extendsFrom implementation
+	shim1122CompileOnly.extendsFrom compileOnly
+	probeImplementation.extendsFrom compileOnly
+}
+
+dependencies {
+	minecraft "com.mojang:minecraft:${project.minecraft_version}"
+	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+
+	// Provided by Fabric Loader at runtime. Only used for class inspection.
+	compileOnly "org.ow2.asm:asm:9.10.1"
+	compileOnly "org.ow2.asm:asm-commons:9.10.1"
+	shim1122CompileOnly "org.ow2.asm:asm:9.10.1"
+	probeImplementation "org.ow2.asm:asm:9.10.1"
+	probeImplementation "org.ow2.asm:asm-commons:9.10.1"
+	probeImplementation "com.google.guava:guava:33.4.8-jre"
+	probeImplementation "org.apache.logging.log4j:log4j-api:2.24.3"
+	probeImplementation "org.slf4j:slf4j-api:2.0.17"
+	probeImplementation "com.google.code.gson:gson:2.11.0"
+	probeImplementation "io.netty:netty-buffer:4.1.118.Final"
+}
+
+tasks.register('runCompatibilityProbe', JavaExec) {
+	dependsOn 'probeClasses', 'shim1122Classes', 'processResources'
+	classpath = sourceSets.probe.runtimeClasspath
+	mainClass = 'dev.legacyloader.probe.CompatibilityProbe'
+}
+
+tasks.register('runRegistryProbe', JavaExec) {
+	dependsOn 'probeClasses', 'shim1122Classes', 'processResources'
+	classpath = sourceSets.probe.runtimeClasspath
+	mainClass = 'dev.legacyloader.probe.RegistryEventProbe'
+}
+
+tasks.register('runLifecycleProbe', JavaExec) {
+	dependsOn 'probeClasses', 'shim1122Classes', 'processResources'
+	classpath = sourceSets.probe.runtimeClasspath
+	mainClass = 'dev.legacyloader.runtime.LifecycleProbe'
+}
+
+// Build a class index for the shim layer. The runtime uses it to decide which
+// net.minecraft.* / net.minecraftforge.* names are real shims and which are
+// modern classes that must stay invisible to legacy code.
+def shimIndexDir = layout.buildDirectory.dir('generated/shim-index')
+def generateShimIndex = tasks.register('generateShimIndex') {
+	dependsOn tasks.named('compileShim1122Java')
+	inputs.files(sourceSets.shim1122.output.classesDirs)
+	outputs.dir(shimIndexDir)
+	doLast {
+		def names = new TreeSet<String>()
+		sourceSets.shim1122.output.classesDirs.each { dir ->
+			if (!dir.exists()) return
+			dir.eachFileRecurse { file ->
+				if (!file.isFile() || !file.name.endsWith('.class')) return
+				def rel = dir.toPath().relativize(file.toPath()).toString()
+				names.add(rel.substring(0, rel.length() - '.class'.length()).replace(File.separatorChar, '/' as char))
+			}
+		}
+		def out = shimIndexDir.get().file('META-INF/legacyloader/shim-index-1.12.2.txt').asFile
+		out.parentFile.mkdirs()
+		out.text = names.join('\n') + '\n'
+	}
+}
+
+sourceSets.main.resources.srcDir(shimIndexDir)
+
+tasks.matching { it.name == 'runClient' }.configureEach {
+	dependsOn 'shim1122Classes'
+}
+
+tasks.named('processResources') {
+	dependsOn generateShimIndex
+	def version = project.version
+	inputs.property 'version', version
+	filesMatching('fabric.mod.json') {
+		expand 'version': version
+	}
+}
+
+tasks.named('compileJava') {
+	// main must not see shims at compile time by accident
+	doFirst {
+		if (sourceSets.main.compileClasspath.contains(sourceSets.shim1122.output)) {
+			throw new GradleException('shim1122 output leaked into main compile classpath')
+		}
+	}
+}
+
+tasks.named('compileShim1122Java') {
+	dependsOn tasks.named('compileJava')
+}
+
+tasks.register('shimJar', Jar) {
+	archiveFileName = 'shims-1.12.2.jar'
+	destinationDirectory = layout.buildDirectory.dir('shimjar')
+	from sourceSets.shim1122.output
+}
+
+tasks.named('jar') {
+	dependsOn 'shimJar'
+	// Shims must NOT be loose classes on the Knot classpath: several 1.12 names
+	// collide with modern classes (Particle, TextureManager, ...). They are
+	// embedded as a nested jar and defined by ShimClassLoader only.
+	from(tasks.named('shimJar')) {
+		into 'META-INF/legacyloader'
+	}
+}
+
+tasks.matching { it.name == 'sourcesJar' }.configureEach {
+	dependsOn generateShimIndex
+}
+
+tasks.withType(JavaCompile).configureEach {
+	options.release = 25
+	options.encoding = 'UTF-8'
+}
+
+java {
+	withSourcesJar()
+	sourceCompatibility = JavaVersion.VERSION_25
+	targetCompatibility = JavaVersion.VERSION_25
+}
+
+// In-game smoke test configuration.
+loom {
+	runs {
+		client {
+			vmArg "-Dlegacyloader.forceServerProxy=true"
+			property "fabric.log.level", "info"
+		}
+	}
+}

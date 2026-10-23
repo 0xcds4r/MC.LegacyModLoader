@@ -1,0 +1,20 @@
+{
+	"schemaVersion": 1,
+	"id": "legacyloader",
+	"version": "${version}",
+	"name": "Legacy Mod Loader",
+	"description": "Runs unmodified 1.12.2 Forge mods on modern Minecraft through an isolated classloader and a shim compatibility layer.",
+	"authors": ["Legacy Mod Loader contributors"],
+	"license": "MIT",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"dev.legacyloader.LegacyModLoader"
+		]
+	},
+	"depends": {
+		"fabricloader": ">=0.19.5",
+		"minecraft": "~26.3",
+		"java": ">=25"
+	}
+}
